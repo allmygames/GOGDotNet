@@ -27,7 +27,7 @@ namespace GOGDotNet
         /// </summary>
         /// <param name="userID"></param>
         /// <returns></returns>
-        public async Task<(ProfileState, IEnumerable<Game>)> GetGamesStatsAsync(string userID)
+        public virtual async Task<(ProfileState, IEnumerable<Game>)> GetGamesStatsAsync(string userID)
         {
             if (string.IsNullOrEmpty(userID))
             {
