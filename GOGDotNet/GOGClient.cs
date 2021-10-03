@@ -62,8 +62,8 @@ namespace GOGDotNet
                     string imageUrl = responseItem?.game?.image?.Value;
                     if (imageUrl != null)
                     {
-                // Update image URL to get full-size image
-                imageUrl = imageUrl.Replace(".png", "_prof_game_200x120.png");
+                        // Update image URL to get full-size image
+                        imageUrl = imageUrl.Replace(".png", "_prof_game_200x120.png");
                     }
 
 
@@ -79,9 +79,9 @@ namespace GOGDotNet
 
                     if (responseItem?.stats != null)
                     {
-                // stats: []
-                // stats: { "<id>": object }
-                dynamic stats = JToken.FromObject(responseItem?.stats as object).First?.Value<JProperty>()?.Value;
+                        // stats: []
+                        // stats: { "<id>": object }
+                        dynamic stats = JToken.FromObject(responseItem?.stats as object).First?.Value<JProperty>()?.Value;
 
                         game.LastSession = stats?.lastSession?.Value;
                         game.AchievementsPercentage = stats?.achievementsPercentage?.Value == null
