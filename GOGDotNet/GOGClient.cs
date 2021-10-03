@@ -78,8 +78,6 @@ namespace GOGDotNet
 
                     if (responseItem?.stats != null)
                     {
-                        // stats: []
-                        // stats: { "<id>": object }
                         dynamic stats = JToken.FromObject(responseItem?.stats as object).First?.Value<JProperty>()?.Value;
 
                         game.LastSession = stats?.lastSession?.Value;
