@@ -67,7 +67,6 @@ namespace GOGDotNet
                     }
 
 
-
                     var game = new Game()
                     {
                         AchievementSupport = responseItem?.game?.achievementSupport?.Value,
