@@ -1,5 +1,6 @@
 ﻿using GOGDotNet.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -61,11 +62,13 @@ namespace GOGDotNet
                     string imageUrl = responseItem?.game?.image?.Value;
                     if (imageUrl != null)
                     {
-                        // Update image URL to get full-size image
-                        imageUrl = imageUrl.Replace(".png", "_prof_game_200x120.png");
+                // Update image URL to get full-size image
+                imageUrl = imageUrl.Replace(".png", "_prof_game_200x120.png");
                     }
 
-                    return new Game()
+
+
+                    var game = new Game()
                     {
                         AchievementSupport = responseItem?.game?.achievementSupport?.Value,
                         Id = ulong.Parse(responseItem?.game?.id?.Value),
@@ -73,6 +76,21 @@ namespace GOGDotNet
                         Title = responseItem?.game?.title?.Value,
                         Url = responseItem?.game?.url?.Value
                     };
+
+                    if (responseItem?.stats != null)
+                    {
+                // stats: []
+                // stats: { "<id>": object }
+                dynamic stats = JToken.FromObject(responseItem?.stats as object).First?.Value<JProperty>()?.Value;
+
+                        game.LastSession = stats?.lastSession?.Value;
+                        game.AchievementsPercentage = stats?.achievementsPercentage?.Value == null
+                    ? null : Convert.ToUInt32(stats?.achievementsPercentage?.Value);
+                        game.Playtime = stats?.playtime?.Value == null
+                    ? null : Convert.ToUInt32(stats?.playtime?.Value);
+                    }
+
+                    return game;
                 }));
             }
 
