@@ -22,7 +22,7 @@ namespace GOGDotNet.Tests
             const string userID = "MChartier";
             var response = await this.client.GetGamesStatsAsync(userID);
             Assert.IsNotNull(response);
-            Assert.AreEqual(response.Item1, Models.ProfileState.Verified);
+            Assert.AreEqual(Models.ProfileState.Verified, response.Item1);
 
             var games = response.Item2.ToList();
             var discoElysium = games.FirstOrDefault(g => g.Id == 1771589310);

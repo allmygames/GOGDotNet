@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.2.0</Version>
+    <Version>1.0.0</Version>
     <Authors>Matthew Chartier</Authors>
     <Company>Condorcet, LLC</Company>
     <Product>AllMyGames</Product>
@@ -19,8 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.*" />
-    <PackageReference Include="RestSharp" Version="106.*" />
+    <PackageReference Include="RestSharp" Version="110.*" />
   </ItemGroup>
 
 </Project>
