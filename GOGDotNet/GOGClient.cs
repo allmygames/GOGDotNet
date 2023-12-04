@@ -1,6 +1,4 @@
 ﻿using GOGDotNet.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -42,7 +40,7 @@ namespace GOGDotNet
             for (int i = 0; i < numPages; i++)
             {
                 // Get the response back for the current page
-                (ProfileState profileState, dynamic responseObject) = await this.GetResponsePageAsync(userID, i + 1);
+                (ProfileState profileState, GogGameResponse responseObject) = await this.GetResponsePageAsync(userID, i + 1);
                 if (profileState != ProfileState.Verified || responseObject == null)
                 {
                     // If we failed to retrieve a response, return null immediately
@@ -56,10 +54,10 @@ namespace GOGDotNet
                 }
 
                 // Convert response items to Game objects and add to list
-                List<dynamic> responseItemList = new List<dynamic>(responseObject._embedded.items);
+                List<GogItem> responseItemList = new List<GogItem>(responseObject._embedded.items);
                 games.AddRange(responseItemList.Select(responseItem =>
                 {
-                    string imageUrl = responseItem?.game?.image?.Value;
+                    string imageUrl = responseItem?.game?.image;
                     if (imageUrl != null)
                     {
                         // Update image URL to get full-size image
@@ -69,22 +67,19 @@ namespace GOGDotNet
 
                     var game = new Game()
                     {
-                        AchievementSupport = responseItem?.game?.achievementSupport?.Value,
-                        Id = ulong.Parse(responseItem?.game?.id?.Value),
+                        AchievementSupport = responseItem?.game?.achievementSupport ?? false,
+                        Id = ulong.Parse(responseItem?.game?.id),
                         Image = imageUrl,
-                        Title = responseItem?.game?.title?.Value,
-                        Url = responseItem?.game?.url?.Value
+                        Title = responseItem?.game?.title,
+                        Url = responseItem?.game?.url
                     };
 
                     if (responseItem?.stats != null)
                     {
-                        dynamic stats = JToken.FromObject(responseItem?.stats as object).First?.Value<JProperty>()?.Value;
-
-                        game.LastSession = stats?.lastSession?.Value;
-                        game.AchievementsPercentage = stats?.achievementsPercentage?.Value == null
-                    ? null : Convert.ToUInt32(stats?.achievementsPercentage?.Value);
-                        game.Playtime = stats?.playtime?.Value == null
-                    ? null : Convert.ToUInt32(stats?.playtime?.Value);
+                        var stats = responseItem.stats.First().Value;
+                        game.LastSession = stats.lastSession;
+                        game.AchievementsPercentage = stats.achievementsPercentage;
+                        game.Playtime = stats.playtime;
                     }
 
                     return game;
@@ -95,14 +90,14 @@ namespace GOGDotNet
             return (ProfileState.Verified, games);
         }
 
-        private async Task<(ProfileState, dynamic)> GetResponsePageAsync(string gogId, int pageNumber)
+        private async Task<(ProfileState, GogGameResponse)> GetResponsePageAsync(string gogId, int pageNumber)
         {
             var request = new RestRequest(
                 string.Format(CultureInfo.InvariantCulture, "/u/{0}/games/stats?page={1}", gogId, pageNumber));
 
-            IRestResponse response = await this.client.ExecuteGetAsync(request);
+            var response = await this.client.ExecuteGetAsync<GogGameResponse>(request);
 
-            if (response == null)
+            if (response == null || response.Data == null)
             {
                 // Null response means the request failed
                 return (ProfileState.VerificationFailed, null);
@@ -125,18 +120,7 @@ namespace GOGDotNet
                 }
             }
 
-            dynamic responseObject;
-            try
-            {
-                responseObject = JsonConvert.DeserializeObject(response.Content);
-            }
-            catch (JsonException)
-            {
-                // Failed to deserialize response as JSON
-                return (ProfileState.VerificationFailed, null);
-            }
-
-            return (ProfileState.Verified, responseObject);
+            return (ProfileState.Verified, response.Data);
         }
     }
 }
